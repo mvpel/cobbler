@@ -497,7 +497,7 @@ class BuildIso:
                     errormsg = descendant.COLLECTION_TYPE + " " + descendant.name + " refers to repo " + repo + ", which %%s; cannot build airgapped ISO"
                     if repo_obj is not None:
                         # FIXME: don't hardcode
-                        mirrordir = os.path.join(self.settings.webdir, 'repo_mirror', repo.name)
+                        mirrordir = os.path.join(self.settings.webdir, 'repo_mirror', repo_obj.name)
                         if repo_obj.mirror_locally:
                             if os.path.exists(mirrordir):
                                 repo_objs[repo_obj] = mirrordir
