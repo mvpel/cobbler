@@ -450,7 +450,7 @@ class BuildIso:
 
         # list of referenced repos for airgapped build
         if airgapped:
-            repo_objs = {}
+            repo_names_to_copy = {}
 
         for descendant in descendants:
             data = utils.blender(self.api, False, descendant)
@@ -483,30 +483,35 @@ class BuildIso:
                 cdregex = re.compile("url .*\n", re.IGNORECASE)
                 kickstart_data = cdregex.sub("cdrom\n", kickstart_data)
 
+            if airgapped:
+                # collect a list of repos to rsync to buildisodir
+                descendantrepos = blended['repos']
+                for repo_name in descendantrepos:
+                    errormsg = descendant.COLLECTION_TYPE + " " + descendant.name + " refers to repo " + repo + ", which %%s; cannot build airgapped ISO"
+                    repo_obj = self.api.find_repo(repo_name)
+
+                    # confirm this is a real repo
+                    if repo_obj is None:
+                        utils.die(self.logger,errormsg % "does not exist")
+                    # confirm it is locally mirrored
+                    if not repo_obj.mirror_locally:
+                         utils.die(self.logger,errormsg % "is not configured for local mirroring")
+                    # confirm the mirror directory exists
+                    # FIXME: don't hardcode
+                    mirrordir = os.path.join(self.settings.webdir, 'repo_mirror', repo_obj.name)
+                    if not os.path.exists(mirrordir)
+                        utils.die(self.logger,errormsg % "has a missing local mirror directory")
+
+                    repo_names_to_copy[repo_obj.name] = mirrordir
+
+                    # update this repo's -baseurl in kickstart_data to use cdrom
+                    cdregex = re.compile("^(\s*repo --name=" + repo_obj.name + " --baseurl=).*$", re.MULTILINE)
+                    kickstart_data = cdregex.sub("\1" + "file:///mnt/source/repo_mirror/" + repo_obj.name, kickstart_data)
+
             ks_name = os.path.join(isolinuxdir, "%s.cfg" % descendant.name)
             ks_file = open(ks_name, "w+")
             ks_file.write(kickstart_data)
             ks_file.close()
-
-            # collect a list of referenced repos for airgapped ISO build
-            if airgapped:
-                descendantrepos = blended['repos']
-                for repo in descendantrepos:
-                    # insure this is a real repo, and locally-mirrored
-                    repo_obj = self.api.find_repo(repo)
-                    errormsg = descendant.COLLECTION_TYPE + " " + descendant.name + " refers to repo " + repo + ", which %%s; cannot build airgapped ISO"
-                    if repo_obj is not None:
-                        # FIXME: don't hardcode
-                        mirrordir = os.path.join(self.settings.webdir, 'repo_mirror', repo_obj.name)
-                        if repo_obj.mirror_locally:
-                            if os.path.exists(mirrordir):
-                                repo_objs[repo_obj] = mirrordir
-                            else:
-                                 utils.die(self.logger,errormsg % "has a missing local mirror directory")
-                        else:
-                             utils.die(self.logger,errormsg % "is not configured for local mirroring")
-                    else:
-                        utils.die(self.logger,errormsg % "does not exist")
 
         self.logger.info("done writing config")
         cfg.write("\n")
@@ -520,13 +525,13 @@ class BuildIso:
             if not os.path.exists(repodir):
                 os.makedirs(repodir)
 
-            for repo in repo_objs:
-                src = repo_objs[repo]
-                dst = os.path.join(repodir, repo.name)
-                self.logger.info(" - copying repo " + repo.name + " for airgapped ISO")
+            for repo_name in repo_names_to_copy:
+                src = repo_names_to_copy[repo_name]
+                dst = os.path.join(repodir, repo_name)
+                self.logger.info(" - copying repo " + repo_name + " for airgapped ISO")
                 ok = utils.rsync_files(src, dst, "--exclude=TRANS.TBL", logger=self.logger, quiet=True)
                 if not ok:
-                    utils.die(self.logger,"rsync of repo " + repo.name + " failed")
+                    utils.die(self.logger,"rsync of repo " + repo_name + " failed")
 
         # copy the distro files last
         cmd = "rsync -rlptgu --exclude=boot.cat --exclude=TRANS.TBL --exclude=isolinux/ %s/ %s/../" % (filesource, isolinuxdir)
