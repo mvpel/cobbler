@@ -499,7 +499,7 @@ class BuildIso:
                     # confirm the mirror directory exists
                     # FIXME: don't hardcode
                     mirrordir = os.path.join(self.settings.webdir, 'repo_mirror', repo_obj.name)
-                    if not os.path.exists(mirrordir)
+                    if not os.path.exists(mirrordir):
                         utils.die(self.logger,errormsg % "has a missing local mirror directory")
 
                     repo_names_to_copy[repo_obj.name] = mirrordir
