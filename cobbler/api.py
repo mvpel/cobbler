@@ -838,10 +838,10 @@ class BootAPI:
         self.log("import_tree",[mirror_url, mirror_name, network_root, kickstart_file, rsync_flags])
 
         # both --path and --name are required arguments
-        if mirror_url is None:
+        if mirror_url is None or not mirror_url:
             self.log("import failed.  no --path specified")
             return False
-        if mirror_name is None:
+        if mirror_name is None or not mirror_name:
             self.log("import failed.  no --name specified")
             return False
 
