@@ -454,8 +454,8 @@ class RepoSync:
         dst = temp_path + "/repomd.xml"
         try:
             urlgrabber.grabber.urlgrab(src, filename=dst, proxies=proxies)
-        except:
-            utils.die(self.logger, "failed to fetch %s" % src)
+        except Exception as e:
+            utils.die(self.logger, "failed to fetch " + src + " " + e.args)
 
         # create our repodata directory now, as any extra metadata we're
         # about to download probably lives there
@@ -470,8 +470,8 @@ class RepoSync:
                 dst = dest_path + "/" + mdfile
                 try:
                     urlgrabber.grabber.urlgrab(src, filename=dst, proxies=proxies)
-                except:
-                    utils.die(self.logger, "failed to fetch %s" % src)
+                except Exception as e:
+                    utils.die(self.logger, "failed to fetch " + src + " " + e.args)
 
         # now run createrepo to rebuild the index
         os.path.walk(dest_path, self.createrepo_walker, repo)
