@@ -521,7 +521,7 @@ class BuildIso:
         # copy the associated repos to the ISO build directory
         if airgapped:
             # FIXME: don't hardcode
-            repodir = os.path.join(isolinuxdir, '..', 'repo_mirror')
+            repodir = os.path.abspath(isolinuxdir, '..', 'repo_mirror')
             if not os.path.exists(repodir):
                 os.makedirs(repodir)
 
