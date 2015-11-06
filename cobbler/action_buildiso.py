@@ -530,7 +530,7 @@ class BuildIso:
                 dst = os.path.join(repodir, repo_name)
                 self.logger.info(" - copying repo '" + repo_name + "' for airgapped ISO")
                 # repo cache directories usually overwhelm the mkisofs translation table, so exclude them
-                ok = utils.rsync_files(src, dst, "--exclude=TRANS.TBL --exclude=config.repo --exclude=cache/ --no-g", logger=self.logger, quiet=True)
+                ok = utils.rsync_files(src, dst, "--exclude=TRANS.TBL --exclude=cache/ --no-g", logger=self.logger, quiet=True)
                 if not ok:
                     utils.die(self.logger,"rsync of repo '" + repo_name + "' failed")
 
