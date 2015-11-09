@@ -508,6 +508,10 @@ class BuildIso:
                     reporegex = re.compile("^(\s*repo --name=" + repo_obj.name + " --baseurl=).*$", re.MULTILINE)
                     kickstart_data = reporegex.sub(r"\1" + "file:///mnt/source/repo_mirror/" + repo_obj.name, kickstart_data)
 
+                # rewrite any distro-supplied repositories, such as in redhat, to use cdrom
+                srcreporegex = re.compile("^(\s*repo --name=\S+ --baseurl=)http.*/cobbler/ks_mirror/" + distro.name +"/?(.*)", re.MULTILINE)
+                kickstart_data = srcreporegex.sub(r"\1" + "file:///mnt/source/" + r"\2", kickstart_data)
+
             ks_name = os.path.join(isolinuxdir, "%s.cfg" % descendant.name)
             ks_file = open(ks_name, "w+")
             ks_file.write(kickstart_data)
