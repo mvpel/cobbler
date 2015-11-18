@@ -104,7 +104,7 @@ class Item:
             results.append(self.children[k])
         return results
 
-    def get_descendants(self, sorted=False):
+    def get_descendants(self, sort=False):
         """
         Get objects that depend on this object, i.e. those that
         would be affected by a cascading delete, etc.
@@ -112,13 +112,13 @@ class Item:
         e.g., distro -> [profile, sys, sys, profile, sys, sys]
         """
         results = []
-        kids = self.get_children(sorted=sorted)
-        if not sorted:
+        kids = self.get_children(sorted=sort)
+        if not sort:
             results.extend(kids)
         for kid in kids:
-            if sorted:
+            if sort:
                 results.append(kid)
-            grandkids = kid.get_descendants(sorted=sorted)
+            grandkids = kid.get_descendants(sort=sort)
             results.extend(grandkids)
         return results
 
