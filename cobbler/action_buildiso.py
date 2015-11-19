@@ -140,7 +140,7 @@ class BuildIso:
                 which_objs.append(obj)
 
         if not which_objs:
-            utils.die("No valid systems or profiles were specified.")
+            utils.die(self.logger, "No valid systems or profiles were specified.")
 
         return which_objs
 
@@ -426,7 +426,7 @@ class BuildIso:
        cfg.close()
 
 
-    def generate_standalone_iso(self,imagesdir,isolinuxdir,distname,filesource,airgapped):
+    def generate_standalone_iso(self,imagesdir,isolinuxdir,distname,filesource,airgapped,profiles):
         """
         Create bootable CD image to be used for handsoff CD installtions
         """
@@ -578,15 +578,22 @@ class BuildIso:
         # the distro option is for stand-alone builds only
         if not standalone and distro is not None:
             utils.die(self.logger,"The --distro option should only be used when creating a standalone or airgapped ISO")
-        # if building standalone, we only want --distro,
-        # profiles/systems are disallowed
+        # if building standalone, we only want --distro and --profiles (optional),
+        # systems are disallowed
         if standalone:
-            if profiles is not None or systems is not None:
-                utils.die(self.logger,"When building a standalone ISO, use --distro only instead of --profiles/--systems")
+            if systems is not None:
+                utils.die(self.logger,"When building a standalone ISO, use --distro and --profiles only, not --systems")
             elif distro is None:
                 utils.die(self.logger,"When building a standalone ISO, you must specify a --distro")
             if source != None and not os.path.exists(source):
                 utils.die(self.logger,"The source specified (%s) does not exist" % source)
+
+            # insure all profiles specified are children of the distro
+            if profiles is not None:
+                which_profiles = self.filter_systems_or_profiles(profiles, 'profile')
+                for profile in which_profiles:
+                    if profile.distro != distro:
+                        utils.die(self.logger, "When building a standalone ISO, all --profiles must be under --distro")
 
         # if iso is none, create it in . as "kickstart.iso"
         if iso is None:
@@ -643,7 +650,7 @@ class BuildIso:
                utils.copyfile(f, os.path.join(isolinuxdir, os.path.basename(f)), self.api)
 
         if standalone or airgapped:
-            self.generate_standalone_iso(imagesdir,isolinuxdir,distro,source,airgapped)
+            self.generate_standalone_iso(imagesdir,isolinuxdir,distro,source,airgapped,profiles)
         else:
             self.generate_netboot_iso(imagesdir,isolinuxdir,profiles,systems,exclude_dns)
 
