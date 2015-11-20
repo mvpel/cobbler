@@ -480,8 +480,8 @@ class BuildIso:
                 kickstart_data = self.api.kickgen.generate_kickstart_for_system(descendant.name)
 
             if distro.breed == "redhat":
-                cdregex = re.compile("url .*\n", re.IGNORECASE)
-                kickstart_data = cdregex.sub("cdrom\n", kickstart_data)
+                cdregex = re.compile("^\s*url .*\n", re.IGNORECASE | re.MULTILINE)
+                kickstart_data = cdregex.sub("cdrom\n", autoinstall_data, count=1)
 
             if airgapped:
                 # collect a list of repos to rsync to buildisodir
