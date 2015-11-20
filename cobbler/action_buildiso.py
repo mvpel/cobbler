@@ -116,33 +116,33 @@ class BuildIso:
        return cmp(a.name,b.name)
 
     def filter_systems_or_profiles(self, selected_items, list_type):
-        """
-        Return a list of valid profile or system objects selected from all profiles
-        or systems by name, or everything if selected_items is empty
-        """
-        if list_type == 'profile':
-            all_objs = [profile for profile in self.api.profiles()]
-        elif list_type == 'system':
-            all_objs = [system for system in self.api.systems()]
-        else:
-            utils.die(self.logger, "Invalid list_type argument: " + list_type)
+       """
+       Return a list of valid profile or system objects selected from all profiles
+       or systems by name, or everything if selected_items is empty
+       """
+       if list_type == 'profile':
+           all_objs = [profile for profile in self.api.profiles()]
+       elif list_type == 'system':
+           all_objs = [system for system in self.api.systems()]
+       else:
+           utils.die(self.logger, "Invalid list_type argument: " + list_type)
 
-        all_objs.sort(self.sort_name)
+       all_objs.sort(self.sort_name)
 
-        # no profiles/systems selection is made, let's process everything
-        if not selected_items:
-            return all_objs
+       # no profiles/systems selection is made, let's process everything
+       if not selected_items:
+           return all_objs
 
-        which_objs = []
-        selected_list = utils.input_string_or_list(selected_items)
-        for obj in all_objs:
-            if obj.name in selected_list:
-                which_objs.append(obj)
+       which_objs = []
+       selected_list = utils.input_string_or_list(selected_items)
+       for obj in all_objs:
+           if obj.name in selected_list:
+               which_objs.append(obj)
 
-        if not which_objs:
-            utils.die(self.logger, "No valid systems or profiles were specified.")
+       if not which_objs:
+           utils.die(self.logger, "No valid systems or profiles were specified.")
 
-        return which_objs
+       return which_objs
 
     def generate_netboot_iso(self,imagesdir,isolinuxdir,profiles=None,systems=None,exclude_dns=None):
        """
@@ -469,7 +469,7 @@ class BuildIso:
 
         for descendant in descendants:
             # if a list of profiles was given, skip any others and their systems
-            if (profiles is not None
+            if (profiles
                 and ((descendant.COLLECTION_TYPE == 'profile' and descendant.name not in profiles)
                      or (descendant.COLLECTION_TYPE == 'system' and descendant.profile not in profiles))):
                 continue
@@ -508,7 +508,7 @@ class BuildIso:
 
             if distro.breed == "redhat":
                 cdregex = re.compile("^\s*url .*\n", re.IGNORECASE | re.MULTILINE)
-                kickstart_data = cdregex.sub("cdrom\n", autoinstall_data, count=1)
+                kickstart_data = cdregex.sub("cdrom\n", kickstart_data, count=1)
 
             if airgapped:
                 # collect a list of repos to rsync to buildisodir
@@ -552,7 +552,7 @@ class BuildIso:
         # copy the associated repos to the ISO build directory
         if airgapped:
             # FIXME: don't hardcode
-            repodir = os.path.abspath(isolinuxdir, '..', 'repo_mirror')
+            repodir = os.path.abspath(os.path.join(isolinuxdir, '..', 'repo_mirror'))
             if not os.path.exists(repodir):
                 os.makedirs(repodir)
 
