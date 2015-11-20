@@ -443,7 +443,7 @@ class BootCLI:
         if action_name == "buildiso":
 
             defaultiso = os.path.join(os.getcwd(), "generated.iso")
-            self.parser.add_option("--iso", dest="iso", default=defaultiso, help="(OPTIONAL) output ISO to this path")
+            self.parser.add_option("--iso", dest="iso", default=defaultiso, help="(OPTIONAL) output ISO to this file")
             self.parser.add_option("--exclude-dns", dest="exclude_dns", action="store_true", help="(OPTIONAL) prevents addition of name server addresses to the kernel boot options")
             self.parser.add_option("--standalone", dest="standalone", action="store_true", help="(OPTIONAL) creates a standalone ISO with all required distro files on it")
             self.parser.add_option("--airgapped", dest="airgapped", action="store_true", help="(OPTIONAL) like --standalone, but also include all referenced repos in the ISO")
